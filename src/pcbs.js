@@ -252,7 +252,7 @@ exports.parse = (config, points, outlines, units) => {
     for (const [pcb_name, pcb_config] of Object.entries(pcbs)) {
 
         // config sanitization
-        a.unexpected(pcb_config, `pcbs.${pcb_name}`, ['outlines', 'footprints', 'references'])
+        a.unexpected(pcb_config, `pcbs.${pcb_name}`, ['outlines', 'footprints', 'references', 'include_keys'])
         const references = a.sane(pcb_config.references || false, `pcbs.${pcb_name}.references`, 'boolean')()
 
         // outline conversion
@@ -286,10 +286,12 @@ exports.parse = (config, points, outlines, units) => {
 
         const footprints = []
 
-        // key-level footprints
-        for (const [p_name, point] of Object.entries(points)) {
-            for (const [f_name, f] of Object.entries(point.meta.footprints || {})) {
-                footprints.push(footprint(f, `${p_name}.footprints.${f_name}`, points, point, net_indexer, component_indexer, units, {references}))
+        if(pcb_config.include_keys != false) {
+            // key-level footprints
+            for (const [p_name, point] of Object.entries(points)) {
+                for (const [f_name, f] of Object.entries(point.meta.footprints || {})) {
+                    footprints.push(footprint(f, `${p_name}.footprints.${f_name}`, points, point, net_indexer, component_indexer, units, {references}))
+                }
             }
         }
 
